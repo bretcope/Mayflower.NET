@@ -13,7 +13,7 @@
     <copyright>Copyright 2016</copyright>
     <tags>SQL Migration</tags>
     <dependencies>
-      <dependency id="Dapper" version="1.50.0-rc2b"/>
+      <dependency id="Dapper" version="1.42.0"/>
     </dependencies>
   </metadata>
   <files>
