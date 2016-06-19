@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>Mayflower</title>
+    <authors>Bret Copeland</authors>
+    <owners>Bret Copeland</owners>
+    <projectUrl>https://github.com/bretcope/Mayflower.NET</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>SQL Migration</tags>
+    <dependencies>
+      <dependency id="Dapper" version="1.50.0-rc2b"/>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\Mayflower.*" target="lib" />
+  </files>
+</package>
