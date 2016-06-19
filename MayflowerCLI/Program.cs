@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Mayflower;
 using NDesk.Options;
 
@@ -7,6 +8,12 @@ namespace MayflowerCLI
     class Program
     {
         static void Main(string[] args)
+        {
+            SetupAssemblyResolving();
+            Run(args);
+        }
+
+        static void Run(string[] args)
         {
             Options options;
             if (!TryParseArgs(args, out options))
@@ -72,6 +79,23 @@ namespace MayflowerCLI
             Console.WriteLine("  optional --server arguments.");
             Console.WriteLine();
             optionSet.WriteOptionDescriptions(Console.Out);
+        }
+
+        static void SetupAssemblyResolving()
+        {
+            // Load dependant assemblies from embedded resources so that we don't have to distribute them separate from the exe.
+            // https://blogs.msdn.microsoft.com/microsoft_press/2010/02/03/jeffrey-richter-excerpt-2-from-clr-via-c-third-edition/
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+            {
+                var resourceName = "MayflowerCLI." + new AssemblyName(args.Name).Name + ".dll";
+
+                using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+                {
+                    var assemblyData = new byte[stream.Length];
+                    stream.Read(assemblyData, 0, assemblyData.Length);
+                    return Assembly.Load(assemblyData);
+                }
+            };
         }
     }
 }

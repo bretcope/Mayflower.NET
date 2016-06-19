@@ -35,7 +35,7 @@
   <ItemGroup>
     <Reference Include="NDesk.Options, Version=0.2.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\NDesk.Options.0.2.1\lib\NDesk.Options.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -55,9 +55,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="$(SolutionDir)Mayflower\bin\$(Configuration)\*.dll" />
+    <EmbeddedResource Include="$(SolutionDir)packages\NDesk.Options*\lib\*.dll" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Mayflower\Mayflower.csproj">
       <Project>{f8b16d25-faff-4605-8f17-3583795aafbd}</Project>
       <Name>Mayflower</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
