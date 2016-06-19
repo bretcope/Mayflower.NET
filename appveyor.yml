@@ -50,7 +50,7 @@ build:
 #---------------------------------#
 
 artifacts:
-	- path: MayflowerCLI\bin\$(configuration)\mayflower.exe
+  - path: MayflowerCLI\bin\$(configuration)\mayflower.exe
 
 #---------------------------------#
 #     deployment configuration    #
