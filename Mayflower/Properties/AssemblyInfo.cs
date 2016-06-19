@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Mayflower")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A simple forward-only database migrator for SQL Server based on the migrator Stack Overflow uses.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Mayflower")]
