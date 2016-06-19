@@ -70,7 +70,9 @@
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
   -->
+  <Target Name="AfterBuild">
+    <!-- Make a copy of the exe without the CLI part -->
+    <Copy SourceFiles="$(ProjectDir)bin\$(Configuration)\MayflowerCLI.exe" DestinationFiles="$(ProjectDir)bin\$(Configuration)\mayflower.exe" />
+  </Target>
 </Project>

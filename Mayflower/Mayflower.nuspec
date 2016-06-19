@@ -18,5 +18,6 @@
   </metadata>
   <files>
     <file src="bin\Release\Mayflower.*" target="lib" />
+    <file src="..\MayflowerCLI\bin\Release\mayflower.exe" target="tools" />
   </files>
 </package>
