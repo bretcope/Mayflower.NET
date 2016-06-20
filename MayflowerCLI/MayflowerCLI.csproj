@@ -55,8 +55,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="$(SolutionDir)Mayflower\bin\$(Configuration)\*.dll" />
-    <EmbeddedResource Include="$(SolutionDir)packages\NDesk.Options*\lib\*.dll" />
+    <EmbeddedResource Include="..\Mayflower\bin\$(Configuration)\*.dll" />
+    <EmbeddedResource Include="..\packages\NDesk.Options*\lib\*.dll" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mayflower\Mayflower.csproj">
@@ -73,6 +73,6 @@
   -->
   <Target Name="AfterBuild">
     <!-- Make a copy of the exe without the CLI part -->
-    <Copy SourceFiles="$(ProjectDir)bin\$(Configuration)\MayflowerCLI.exe" DestinationFiles="$(ProjectDir)bin\$(Configuration)\mayflower.exe" />
+    <Copy SourceFiles="bin\$(Configuration)\MayflowerCLI.exe" DestinationFiles="bin\$(Configuration)\mayflower.exe" />
   </Target>
 </Project>
