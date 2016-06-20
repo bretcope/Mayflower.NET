@@ -33,6 +33,7 @@ namespace MayflowerCLI
         static bool TryParseArgs(string[] args, out Options options)
         {
             var showHelp = false;
+            var showVersion = false;
             var optionsTmp = options = new Options();
 
             var optionSet = new OptionSet()
@@ -47,13 +48,14 @@ namespace MayflowerCLI
                 {"global", "Run all outstanding migrations in a single transaction, if possible.", v => optionsTmp.UseGlobalTransaction = v != null },
                 {"table=", "Name of the table used to track migrations (default: Migrations)", v => optionsTmp.MigrationsTable = v },
                 {"force", "Will rerun modified migrations.", v => optionsTmp.Force = v != null },
+                {"version", "Print version number.", v => showVersion = v != null }
             };
 
             try
             {
                 optionSet.Parse(args);
 
-                if (!showHelp)
+                if (!showHelp && !showVersion)
                     optionsTmp.AssertValid();
             }
             catch (Exception ex)
@@ -61,6 +63,13 @@ namespace MayflowerCLI
                 Console.WriteLine(ex.Message);
                 Console.WriteLine();
                 showHelp = true;
+            }
+
+            if (showVersion)
+            {
+                Console.WriteLine("Mayflower.NET - Version " + Migrator.GetVersion());
+                Console.WriteLine();
+                return false;
             }
 
             if (showHelp)

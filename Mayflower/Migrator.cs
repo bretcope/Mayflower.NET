@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Mayflower
@@ -77,6 +78,12 @@ namespace Mayflower
         public void Dispose()
         {
             _db?.Dispose();
+        }
+
+        public static string GetVersion()
+        {
+            var attr = typeof(Migrator).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            return attr.InformationalVersion;
         }
 
         public static MigrationResult RunOutstandingMigrations(Options options)
