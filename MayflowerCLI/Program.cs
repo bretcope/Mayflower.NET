@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Mayflower;
 using NDesk.Options;
 
@@ -13,6 +14,7 @@ namespace MayflowerCLI
             Run(args);
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         static void Run(string[] args)
         {
             Options options;
