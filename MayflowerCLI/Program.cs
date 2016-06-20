@@ -8,6 +8,13 @@ namespace MayflowerCLI
 {
     class Program
     {
+        enum Command
+        {
+            None,
+            RunMigrations,
+            GetCount,
+        }
+
         static void Main(string[] args)
         {
             SetupAssemblyResolving();
@@ -18,22 +25,30 @@ namespace MayflowerCLI
         static void Run(string[] args)
         {
             Options options;
-            if (!TryParseArgs(args, out options))
-                return;
+            var cmd = TryParseArgs(args, out options);
 
-            options.Output = Console.Out;
-
-            var result = Migrator.RunOutstandingMigrations(options);
-            if (!result.Success)
-                Environment.Exit(1);
+            switch (cmd)
+            {
+                case Command.RunMigrations:
+                    var result = Migrator.RunOutstandingMigrations(options);
+                    if (!result.Success)
+                        Environment.Exit(1);
+                    break;
+                case Command.GetCount:
+                    var count = Migrator.GetOutstandingMigrationsCount(options);
+                    Console.WriteLine(count + " outstanding migrations");
+                    Console.WriteLine();
+                    break;
+            }
 
             Environment.Exit(0);
         }
 
-        static bool TryParseArgs(string[] args, out Options options)
+        static Command TryParseArgs(string[] args, out Options options)
         {
             var showHelp = false;
             var showVersion = false;
+            var getCount = false;
             var optionsTmp = options = new Options();
 
             var optionSet = new OptionSet()
@@ -48,12 +63,14 @@ namespace MayflowerCLI
                 {"global", "Run all outstanding migrations in a single transaction, if possible.", v => optionsTmp.UseGlobalTransaction = v != null },
                 {"table=", "Name of the table used to track migrations (default: Migrations)", v => optionsTmp.MigrationsTable = v },
                 {"force", "Will rerun modified migrations.", v => optionsTmp.Force = v != null },
-                {"version", "Print version number.", v => showVersion = v != null }
+                {"version", "Print version number.", v => showVersion = v != null },
+                { "count", "Print the number of outstanding migrations.", v => getCount = v != null },
             };
 
             try
             {
                 optionSet.Parse(args);
+                options.Output = Console.Out;
 
                 if (!showHelp && !showVersion)
                     optionsTmp.AssertValid();
@@ -69,16 +86,16 @@ namespace MayflowerCLI
             {
                 Console.WriteLine("Mayflower.NET - Version " + Migrator.GetVersion());
                 Console.WriteLine();
-                return false;
+                return Command.None;
             }
 
             if (showHelp)
             {
                 ShowHelpMessage(optionSet);
-                return false;
+                return Command.None;
             }
 
-            return true;
+            return getCount ? Command.GetCount : Command.RunMigrations;
         }
 
         static void ShowHelpMessage(OptionSet optionSet)

@@ -86,6 +86,21 @@ namespace Mayflower
             return attr.InformationalVersion;
         }
 
+        public static int GetOutstandingMigrationsCount(Options options)
+        {
+            using (var migrator = Create(options))
+            {
+                var count = 0;
+                foreach (var m in migrator.Migrations)
+                {
+                    if (m.GetMigrateMode(migrator._alreadyRan) != MigrateMode.Skip)
+                        count++;
+                }
+
+                return count;
+            }
+        }
+
         public static MigrationResult RunOutstandingMigrations(Options options)
         {
             using (var migrator = Create(options))
