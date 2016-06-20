@@ -90,15 +90,12 @@ namespace MayflowerCLI
             AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
             {
                 var resourceName = "MayflowerCLI." + new AssemblyName(args.Name).Name + ".dll";
-                Console.WriteLine("Requested: " + args.Name);
 
                 using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
                 {
                     var assemblyData = new byte[stream.Length];
                     stream.Read(assemblyData, 0, assemblyData.Length);
-                    var asm = Assembly.Load(assemblyData);
-                    Console.WriteLine("Found: " + asm.FullName);
-                    return asm;
+                    return Assembly.Load(assemblyData);
                 }
             };
         }
