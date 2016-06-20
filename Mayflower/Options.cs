@@ -10,7 +10,7 @@ namespace Mayflower
         public string Database { get; set; }
         public string Server { get; set; }
         public int CommandTimeout { get; set; } = 30;
-        public string MigrationsDirectory { get; set; }
+        public string MigrationsFolder { get; set; }
         public bool IsPreview { get; set; }
         public bool UseGlobalTransaction { get; set; }
         public string MigrationsTable { get; set; }
@@ -46,12 +46,12 @@ namespace Mayflower
 
         internal string GetMigrationsTable()
         {
-            return string.IsNullOrEmpty(MigrationsDirectory) ? "Migrations" : MigrationsTable;
+            return string.IsNullOrEmpty(MigrationsFolder) ? "Migrations" : MigrationsTable;
         }
 
-        internal string GetDirectory()
+        internal string GetFolder()
         {
-            return string.IsNullOrEmpty(MigrationsDirectory) ? Directory.GetCurrentDirectory() : MigrationsDirectory;
+            return string.IsNullOrEmpty(MigrationsFolder) ? Directory.GetCurrentDirectory() : MigrationsFolder;
         }
     }
 }

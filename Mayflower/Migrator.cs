@@ -41,7 +41,7 @@ namespace Mayflower
             _useGlobalTransaction = options.UseGlobalTransaction || _isPreview; // always run preview in a global transaction so previous migrations are seen
             _force = options.Force;
 
-            var dir = options.GetDirectory();
+            var dir = options.GetFolder();
 
             Log("Mayflower.NET Migrator");
             Log("    Directory:        " + dir);
