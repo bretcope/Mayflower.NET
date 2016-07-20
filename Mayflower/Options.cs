@@ -46,7 +46,7 @@ namespace Mayflower
 
         internal string GetMigrationsTable()
         {
-            return string.IsNullOrEmpty(MigrationsFolder) ? "Migrations" : MigrationsTable;
+            return string.IsNullOrEmpty(MigrationsTable) ? "Migrations" : MigrationsTable;
         }
 
         internal string GetFolder()
