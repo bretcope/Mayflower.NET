@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
-using Dapper;
 
 namespace Mayflower
 {
@@ -85,40 +84,81 @@ namespace Mayflower
 
         internal bool MigrationTableExists()
         {
-            return _connection.ExecuteScalar<int>(_sql.DoesMigrationsTableExist) == 1;
+            var cmd = _connection.NewCommand(_sql.DoesMigrationsTableExist);
+            return (int)cmd.ExecuteScalar() == 1;
         }
 
         internal void CreateMigrationsTable()
         {
-            _connection.Execute(_sql.CreateMigrationsTable);
+            var cmd = _connection.NewCommand(_sql.CreateMigrationsTable);
+            cmd.ExecuteNonQuery();
         }
 
         internal AlreadyRan GetAlreadyRan()
         {
-            var results = _connection.Query<MigrationRow>(_sql.GetAlreadyRan);
+            var results = new List<MigrationRow>();
+            var cmd = _connection.NewCommand(_sql.GetAlreadyRan);
+
+            using (var rdr = cmd.ExecuteReader())
+            {
+                while (rdr.Read())
+                {
+                    var row = new MigrationRow();
+
+                    row.Id = rdr.GetInt32(0);
+                    row.Filename = rdr.GetString(1);
+                    row.Hash = rdr.GetString(2);
+                    row.ExecutionDate = rdr.GetDateTime(3);
+                    row.Duration = rdr.GetInt32(4);
+
+                    results.Add(row);
+                }
+            }
+
             return new AlreadyRan(results);
         }
 
         public int ExecuteCommand(string sql)
         {
-            return _connection.Execute(sql, transaction: _transaction, commandTimeout: _timeout);
+            var cmd = _connection.NewCommand(sql, _transaction, _timeout);
+            return cmd.ExecuteNonQuery();
+
         }
 
         internal void InsertMigrationRecord(MigrationRow row)
         {
-            _connection.Execute(_sql.InsertMigration, row, _transaction);
+            var cmd = _connection.NewCommand(_sql.InsertMigration, _transaction);
+
+            cmd.AddParameter("Filename", row.Filename);
+            cmd.AddParameter("Hash", row.Hash);
+            cmd.AddParameter("ExecutionDate", row.ExecutionDate);
+            cmd.AddParameter("Duration", row.Duration);
+
+            cmd.ExecuteNonQuery();
         }
 
         internal void UpdateMigrationRecordHash(MigrationRow row)
         {
-            var affected = _connection.Execute(_sql.UpdateMigrationHash, row, _transaction);
+            var cmd = _connection.NewCommand(_sql.UpdateMigrationHash, _transaction);
+
+            cmd.AddParameter("Hash", row.Hash);
+            cmd.AddParameter("ExecutionDate", row.ExecutionDate);
+            cmd.AddParameter("Duration", row.Duration);
+            cmd.AddParameter("Filename", row.Filename);
+
+            var affected = cmd.ExecuteNonQuery();
             if (affected != 1)
                 throw new Exception($"Failure updating the migration record. {affected} rows affected. Expected 1.");
         }
 
         internal void RenameMigration(Migration migration)
         {
-            var affected = _connection.Execute(_sql.RenameMigration, migration, _transaction);
+            var cmd = _connection.NewCommand(_sql.RenameMigration, _transaction);
+
+            cmd.AddParameter("Filename", migration.Filename);
+            cmd.AddParameter("Hash", migration.Hash);
+
+            var affected = cmd.ExecuteNonQuery();
             if (affected != 1)
                 throw new Exception($"Failure renaming the migration record. {affected} rows affected. Expected 1.");
         }
