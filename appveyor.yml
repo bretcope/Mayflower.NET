@@ -5,7 +5,7 @@
 #---------------------------------#
 
 environment:
-  CSPROJ: Mayflower\Mayflower.csproj
+  PRIMARY_CSPROJ: Mayflower\Mayflower.csproj
 
 #version: $(NUGET_RELEASE_VERSION).{build}
 
@@ -16,7 +16,7 @@ environment:
 image: Visual Studio 2017 RC
 
 install:
-  - ps: Scripts\PatchCsproj.ps1 -csproj Mayflower\Mayflower.csproj
+  - ps: Scripts\PatchCsproj.ps1
 
 #---------------------------------#
 #       build configuration       #

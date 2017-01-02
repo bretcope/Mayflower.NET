@@ -1,10 +1,10 @@
 param (
     # The csproj file name
-    [Parameter(Mandatory=$true)][string]$csproj,
+    [string]$csproj,
     # The build number (from AppVeyor)
-    [Parameter(Mandatory=$true)][int]$build = [int]::Parse("$env:APPVEYOR_BUILD_NUMBER"),
+    [int]$build,
     # True if this is a tagged release. False for pre-release.
-    [switch]$release = [bool]::Parse("$env:APPVEYOR_REPO_TAG")
+    [switch]$release
 )
 
 function GetPackageVersionNode ([xml] $csXml)
@@ -75,6 +75,13 @@ function InsertOrUpdateElement([System.Xml.XmlNode] $parent, [string] $tag, [str
 
 function Run
 {
+    if ($env:APPVEYOR -eq 'true')
+    {
+        $csproj = "$env:PRIMARY_CSPROJ"
+        $build = [int]::Parse("$env:APPVEYOR_BUILD_NUMBER")
+        $release = [bool]::Parse("$env:APPVEYOR_REPO_TAG")
+    }
+
     # read csproj file
     $fileName = Join-Path -Path (Get-Location) -ChildPath $csproj
     $csXml = New-Object XML
