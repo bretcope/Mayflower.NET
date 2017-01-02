@@ -2,9 +2,9 @@ param (
     # The csproj file name
     [Parameter(Mandatory=$true)][string]$csproj,
     # The build number (from AppVeyor)
-    [Parameter(Mandatory=$true)][int]$build,
+    [Parameter(Mandatory=$true)][int]$build = [int]::Parse("$env:APPVEYOR_BUILD_NUMBER"),
     # True if this is a tagged release. False for pre-release.
-    [switch]$release
+    [switch]$release = [bool]::Parse("$env:APPVEYOR_REPO_TAG")
 )
 
 function GetPackageVersionNode ([xml] $csXml)

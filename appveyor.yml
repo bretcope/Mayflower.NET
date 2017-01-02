@@ -16,7 +16,7 @@ environment:
 image: Visual Studio 2017 RC
 
 install:
-  - ps: Scripts\PatchCsproj.ps1 -csproj Mayflower\Mayflower.csproj -build $(build) -release:\$$(APPVEYOR_REPO_TAG_NAME)
+  - ps: Scripts\PatchCsproj.ps1 -csproj Mayflower\Mayflower.csproj
 
 #---------------------------------#
 #       build configuration       #
