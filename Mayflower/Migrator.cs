@@ -82,8 +82,7 @@ namespace Mayflower
 
         public static string GetVersion()
         {
-            var attr = typeof(Migrator).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-            return attr.InformationalVersion;
+            return "0.9.0-beta"; // todo: figure out a better way to set versions
         }
 
         public static int GetOutstandingMigrationsCount(Options options)

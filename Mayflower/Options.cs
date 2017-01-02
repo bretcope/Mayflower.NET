@@ -10,15 +10,15 @@ namespace Mayflower
         public string Database { get; set; }
         public string Server { get; set; }
         public int CommandTimeout { get; set; } = 30;
-        public string MigrationsFolder { get; set; }
+        public string Directory { get; set; }
         public bool IsPreview { get; set; }
         public bool UseGlobalTransaction { get; set; }
         public string MigrationsTable { get; set; }
         public TextWriter Output { get; set; }
         public bool Force { get; set; }
-        public DatabaseProvider Provider { get; set; } // there's no command line param for this yet because there's only one provider
+        internal DatabaseProvider Provider { get; set; } = DatabaseProvider.SqlServer;
 
-        public void AssertValid()
+        internal void AssertValid()
         {
             if (string.IsNullOrEmpty(ConnectionString) == string.IsNullOrEmpty(Database))
             {
@@ -51,7 +51,7 @@ namespace Mayflower
 
         internal string GetFolder()
         {
-            return string.IsNullOrEmpty(MigrationsFolder) ? Directory.GetCurrentDirectory() : MigrationsFolder;
+            return string.IsNullOrEmpty(Directory) ? System.IO.Directory.GetCurrentDirectory() : Directory;
         }
     }
 }

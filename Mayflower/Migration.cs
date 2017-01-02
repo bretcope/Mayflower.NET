@@ -18,7 +18,7 @@ namespace Mayflower
 
     public class Migration
     {
-        static readonly MD5CryptoServiceProvider s_md5Provider = new MD5CryptoServiceProvider();
+        static readonly MD5 s_md5 = MD5.Create();
         static readonly Regex s_lineEndings = new Regex("\r\n|\n\r|\n|\r", RegexOptions.Compiled);
 
         public List<string> SqlCommands { get; }
@@ -58,9 +58,9 @@ namespace Mayflower
             var inputBytes = Encoding.Unicode.GetBytes(normalized);
 
             byte[] hashBytes;
-            lock (s_md5Provider)
+            lock (s_md5)
             {
-                hashBytes = s_md5Provider.ComputeHash(inputBytes);
+                hashBytes = s_md5.ComputeHash(inputBytes);
             }
 
             return new Guid(hashBytes).ToString();
