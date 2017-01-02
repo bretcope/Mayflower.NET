@@ -17,6 +17,7 @@ image: Visual Studio 2017 RC
 
 install:
   - ps: Scripts\PatchCsproj.ps1
+  - cmd: dotnet restore
 
 #---------------------------------#
 #       build configuration       #
