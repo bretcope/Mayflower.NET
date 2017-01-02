@@ -17,7 +17,6 @@ image: Visual Studio 2017 RC
 
 install:
   - ps: Scripts\PatchCsproj.ps1
-  - cmd: dotnet restore
 
 #---------------------------------#
 #       build configuration       #
@@ -27,11 +26,15 @@ platform: Any CPU
 
 configuration: Release
 
+before_build:
+  - cmd: dotnet restore
+
 build:
   project: Mayflower.sln
-  publish_nuget: true
-  publish_nuget_symbols: true
   verbosity: normal
+
+after_build:
+  - cmd: dotnet pack -c Release --no-build -o nuget --include-symbols %PRIMARY_CSPROJ%
 
 #---------------------------------#
 #       tests configuration       #
@@ -43,8 +46,9 @@ build:
 #      artifacts configuration    #
 #---------------------------------#
 
-#artifacts:
-#  - path: MayflowerCLI\bin\$(configuration)\mayflower.exe
+artifacts:
+  - path: nuget\*
+  - path: Mayflower\bin\$(configuration)\Mayflower*
 
 #---------------------------------#
 #     deployment configuration    #
