@@ -5,18 +5,13 @@
 #---------------------------------#
 
 environment:
-  PRIMARY_CSPROJ: Mayflower\Mayflower.csproj
-
-#version: $(NUGET_RELEASE_VERSION).{build}
+  NUGET_CSPROJ: Mayflower\Mayflower.csproj
 
 #---------------------------------#
 #    environment configuration    #
 #---------------------------------#
 
 image: Visual Studio 2017 RC
-
-install:
-  - ps: Scripts\PatchCsproj.ps1
 
 #---------------------------------#
 #       build configuration       #
@@ -27,13 +22,14 @@ platform: Any CPU
 configuration: Release
 
 before_build:
+  - ps: Scripts\PatchCsproj.ps1
   - cmd: dotnet restore
 
 build_script:
   - cmd: dotnet build -c Release -v normal
 
 after_build:
-  - cmd: dotnet pack -c Release --no-build -o nuget --include-symbols %PRIMARY_CSPROJ%
+  - cmd: dotnet pack -c Release --no-build -o nuget --include-symbols %NUGET_CSPROJ%
 
 #---------------------------------#
 #       tests configuration       #

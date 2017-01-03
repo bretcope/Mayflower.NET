@@ -77,7 +77,7 @@ function Run
 {
     if ($env:APPVEYOR -eq 'true')
     {
-        $csproj = "$env:PRIMARY_CSPROJ"
+        $csproj = "$env:NUGET_CSPROJ"
         $build = [int]::Parse("$env:APPVEYOR_BUILD_NUMBER")
         $release = [bool]::Parse("$env:APPVEYOR_REPO_TAG")
     }
