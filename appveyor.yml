@@ -43,7 +43,6 @@ after_build:
 
 artifacts:
   - path: nuget\*
-  - path: Mayflower\bin\$(configuration)\Mayflower*
 
 #---------------------------------#
 #     deployment configuration    #
