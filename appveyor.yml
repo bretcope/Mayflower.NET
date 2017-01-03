@@ -29,7 +29,7 @@ configuration: Release
 before_build:
   - cmd: dotnet restore
 
-build:
+build_script:
   - cmd: dotnet build -c Release -v normal
 
 after_build:
