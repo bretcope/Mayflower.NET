@@ -30,8 +30,7 @@ before_build:
   - cmd: dotnet restore
 
 build:
-  project: Mayflower.sln
-  verbosity: normal
+  - cmd: dotnet build -c Release -v normal
 
 after_build:
   - cmd: dotnet pack -c Release --no-build -o nuget --include-symbols %PRIMARY_CSPROJ%
