@@ -23,13 +23,13 @@ configuration: Release
 
 before_build:
   - ps: Scripts\PatchCsproj.ps1
-  - cmd: dotnet restore /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cmd: dotnet restore
 
 build_script:
-  - cmd: dotnet build -c Release -v normal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cmd: dotnet build -c Release -v normal
 
 after_build:
-  - cmd: dotnet pack -c Release --no-build -o nuget --include-symbols %NUGET_CSPROJ% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cmd: dotnet pack -c Release --no-build -o nuget --include-symbols %NUGET_CSPROJ%
 
 #---------------------------------#
 #       tests configuration       #
