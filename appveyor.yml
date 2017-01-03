@@ -23,13 +23,18 @@ configuration: Release
 
 before_build:
   - ps: Scripts\PatchCsproj.ps1
-  - cmd: dotnet restore
+  - cmd: msbuild /t:restore
 
-build_script:
-  - cmd: dotnet build -c Release -v normal
+build:
+  project: Mayflower.sln
+  verbosity: normal
+
+#build_script:
+#  - cmd: dotnet build -c Release -v normal
 
 after_build:
-  - cmd: dotnet pack -c Release -o %APPVEYOR_BUILD_FOLDER%\nuget --include-symbols %NUGET_CSPROJ%
+  - cmd: msbuild %NUGET_CSPROJ% /t:pack /p:IncludeSymbols=true
+#  - cmd: dotnet pack -c Release -o %APPVEYOR_BUILD_FOLDER%\nuget --include-symbols %NUGET_CSPROJ%
 
 #---------------------------------#
 #       tests configuration       #
