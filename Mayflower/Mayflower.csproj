@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <TargetFramework>netstandard1.4</TargetFramework>
+    <OutputType>library</OutputType>
     <PackageId>Mayflower</PackageId>
     <PackageVersion>0.9.0</PackageVersion>
     <Authors>Bret Copeland</Authors>
@@ -10,12 +11,6 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Copyright>Copyright 2016 (c) Bret Copeland</Copyright>
     <PackageTags>sql migration migrator</PackageTags>
-    <Version>1.0.0</Version>
-    <FileVersion>1.0.0</FileVersion>
-    <AssemblyVersion>1.0.0</AssemblyVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputType>library</OutputType>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="**\*.cs" />
