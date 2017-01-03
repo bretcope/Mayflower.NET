@@ -167,3 +167,5 @@ node_modules
 .idea
 
 .vs
+
+nuget
