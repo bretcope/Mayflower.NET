@@ -29,7 +29,7 @@ build_script:
   - cmd: dotnet build -c Release -v normal
 
 after_build:
-  - cmd: dotnet pack -c Release --no-build -o nuget -v detailed --include-symbols %NUGET_CSPROJ%
+  - cmd: dotnet pack -c Release -o %APPVEYOR_BUILD_FOLDER%\nuget --include-symbols %NUGET_CSPROJ%
 
 #---------------------------------#
 #       tests configuration       #
