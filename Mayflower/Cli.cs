@@ -15,6 +15,7 @@ namespace Mayflower
         const string PREVIEW = "--preview";
         const string GLOBAL = "--global";
         const string FORCE = "--force";
+        const string AUTORUN = "--autorun";
         const string COUNT = "--count";
         const string VERSION = "--version";
         const string HELP = "--help";
@@ -98,11 +99,20 @@ namespace Mayflower
             if (args.ContainsKey(FORCE))
                 options.Force = true;
 
+            if (args.TryGetValue(AUTORUN, out var autorun))
+            {
+                options.AutoRunPrefixes = string.IsNullOrWhiteSpace(autorun)
+                    ? Array.Empty<string>()
+                    : autorun.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+            }
+
             return options;
         }
 
         static void WriteHelp(TextWriter output)
         {
+            var autorunDefault = string.Join(",", new Options().AutoRunPrefixes);
+
             output.Write($@"Usage: {ExeName} [OPTIONS]+
   Runs all *.sql files in the directory {DIR} <directory>.
   The databse connection can be specified using a full connection string with
@@ -126,6 +136,9 @@ OPTIONS:
   {GLOBAL}              Run all outstanding migrations in a single transaction,
                           if possible.
   {FORCE}               Will rerun modified migrations.
+  {AUTORUN} <value>     A comma-delimited list of filename prefixes which will
+                          automatically rerun anytime they are changed, without
+                          requiring {FORCE} (default: {autorunDefault}).
   {COUNT}               Print the number of outstanding migrations.
   {VERSION}             Print the Mayflower version number.
   {HELP}                Shows this help message.
@@ -151,6 +164,7 @@ OPTIONS:
                     case DIR:
                     case TABLE:
                     case TIMEOUT:
+                    case AUTORUN:
                         var value = i + 1 < args.Length ? args[i + 1] : null;
                         if (value == null || value.StartsWith("--"))
                             throw new Exception($"Argument \"{a}\" is missing a value.");

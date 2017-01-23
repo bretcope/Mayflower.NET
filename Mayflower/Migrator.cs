@@ -29,7 +29,7 @@ namespace Mayflower
 
         readonly AlreadyRan _alreadyRan;
 
-        public List<Migration> Migrations { get; }
+        public Migration[] Migrations { get; }
 
         Migrator(Options options)
         {
@@ -49,7 +49,7 @@ namespace Mayflower
 
             _db = new ConnectionContext(options);
 
-            Migrations = GetAllMigrations(dir, _db.CommandSplitter).ToList();
+            Migrations = GetAllMigrations(dir, options.AutoRunPrefixes, _db.CommandSplitter);
 
             Log("    Database:         " + _db.Database);
             _db.Open();
@@ -114,9 +114,25 @@ namespace Mayflower
             return new Migrator(options);
         }
 
-        static IEnumerable<Migration> GetAllMigrations(string directory, Regex commandSplitter)
+        static Migration[] GetAllMigrations(string directory, string[] autoRunPrefixes, Regex commandSplitter)
         {
-            return Directory.GetFiles(directory, "*.sql").OrderBy(f => f).Select(f => new Migration(f, commandSplitter));
+            var fileNames = Directory.GetFiles(directory, "*.sql");
+            var migrations = new Migration[fileNames.Length];
+
+            for (var i = 0; i < fileNames.Length; i++)
+            {
+                var fileName = fileNames[i];
+                migrations[i] = new Migration(fileName, autoRunPrefixes, commandSplitter);
+            }
+
+            Array.Sort(migrations, MigrationSorter);
+
+            return migrations;
+        }
+
+        static int MigrationSorter(Migration a, Migration b)
+        {
+            return string.Compare(a.Filename, b.Filename, StringComparison.CurrentCultureIgnoreCase);
         }
 
         MigrationResult RunOutstandingMigrations()
@@ -141,6 +157,7 @@ namespace Mayflower
                             result.Skipped++;
                             break;
                         case MigrateMode.Run:
+                        case MigrateMode.AutoRun:
                             result.Ran++;
                             break;
                         case MigrateMode.HashMismatch:
@@ -226,13 +243,21 @@ namespace Mayflower
         void RunMigrationCommands(Migration migration, MigrateMode mode)
         {
             BeginMigration(migration.UseTransaction);
-
-            if (mode == MigrateMode.Run)
-                Log("  Running \"" + migration.Filename + "\"" + (migration.UseTransaction ? "" : " (NO TRANSACTION)"));
-            else if (mode == MigrateMode.HashMismatch)
-                Log($"  {migration.Filename} has been modified since it was run. It is being run again because --force was used.");
-            else
-                throw new Exception("Mayflower bug: RunMigrationCommands called with mode: " + mode);
+            
+            switch (mode)
+            {
+                case MigrateMode.Run:
+                    Log("  Running \"" + migration.Filename + "\"" + (migration.UseTransaction ? "" : " (NO TRANSACTION)"));
+                    break;
+                case MigrateMode.HashMismatch:
+                    Log($"  {migration.Filename} has been modified since it was run. It is being run again because --force was used.");
+                    break;
+                case MigrateMode.AutoRun:
+                    Log($"  {migration.Filename} has been modified since it was run. It is being run again because its filename has an autorun prefix.");
+                    break;
+                default:
+                    throw new Exception("Mayflower bug: RunMigrationCommands called with mode: " + mode);
+            }
             
             var sw = new Stopwatch();
             sw.Start();

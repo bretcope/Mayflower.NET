@@ -16,6 +16,7 @@ namespace Mayflower
         public string MigrationsTable { get; set; }
         public TextWriter Output { get; set; }
         public bool Force { get; set; }
+        public string[] AutoRunPrefixes { get; set; } = { "SP", "AUTORUN" };
         internal DatabaseProvider Provider { get; set; } = DatabaseProvider.SqlServer;
 
         internal void AssertValid()

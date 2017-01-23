@@ -14,6 +14,7 @@ namespace Mayflower
         Run,
         Rename,
         HashMismatch,
+        AutoRun,
     }
 
     public class Migration
@@ -25,8 +26,9 @@ namespace Mayflower
         public string Hash { get; }
         public string Filename { get; }
         public bool UseTransaction { get; }
+        public bool AutoRunIfChanged { get; }
 
-        internal Migration(string filePath, Regex commandSplitter)
+        internal Migration(string filePath, string[] autoRunPrefixes, Regex commandSplitter)
         {
             var sql = File.ReadAllText(filePath, Encoding.GetEncoding("iso-8859-1"));
             SqlCommands = commandSplitter.Split(sql).Where(s => s.Trim().Length > 0).ToList();
@@ -34,6 +36,18 @@ namespace Mayflower
             Filename = Path.GetFileName(filePath);
 
             UseTransaction = !sql.StartsWith("-- no transaction --");
+
+            var autoRun = false;
+            foreach (var prefix in autoRunPrefixes)
+            {
+                if (Filename.StartsWith(prefix))
+                {
+                    autoRun = true;
+                    break;
+                }
+            }
+
+            AutoRunIfChanged = autoRun;
         }
 
         internal MigrateMode GetMigrateMode(AlreadyRan alreadyRan)
@@ -41,7 +55,13 @@ namespace Mayflower
             MigrationRow row;
             if (alreadyRan.ByFilename.TryGetValue(Filename, out row))
             {
-                return row.Hash == Hash ? MigrateMode.Skip : MigrateMode.HashMismatch;
+                if (row.Hash == Hash)
+                    return MigrateMode.Skip;
+
+                if (AutoRunIfChanged)
+                    return MigrateMode.AutoRun;
+
+                return MigrateMode.HashMismatch;
             }
 
             if (alreadyRan.ByHash.TryGetValue(Hash, out row))
