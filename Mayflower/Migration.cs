@@ -19,7 +19,7 @@ namespace Mayflower
     public class Migration
     {
         static readonly MD5 s_md5 = MD5.Create();
-        static readonly Regex s_lineEndings = new Regex("\r\n|\n\r|\n|\r", RegexOptions.Compiled);
+        static readonly Regex s_lineEndings = new Regex("\r\n|\n|\r", RegexOptions.Compiled);
 
         public List<string> SqlCommands { get; }
         public string Hash { get; }
