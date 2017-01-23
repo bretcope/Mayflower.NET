@@ -33,8 +33,8 @@ build:
 #  - cmd: dotnet build -c Release -v normal
 
 after_build:
-  - cmd: msbuild %NUGET_CSPROJ% /t:pack /p:IncludeSymbols=true
-#  - cmd: dotnet pack -c Release -o %APPVEYOR_BUILD_FOLDER%\nuget --include-symbols %NUGET_CSPROJ%
+#  - cmd: msbuild %NUGET_CSPROJ% /t:pack /p:IncludeSymbols=true
+  - cmd: dotnet pack -c Release -v normal --include-symbols %NUGET_CSPROJ%
 
 #---------------------------------#
 #       tests configuration       #
@@ -47,7 +47,7 @@ after_build:
 #---------------------------------#
 
 artifacts:
-  - path: nuget\*
+  - path: '**\*.nupkg'
 
 #---------------------------------#
 #     deployment configuration    #
