@@ -1,32 +1,32 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.25302.0
+VisualStudioVersion = 15.0.26127.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mayflower", "Mayflower\Mayflower.csproj", "{F8B16D25-FAFF-4605-8F17-3583795AAFBD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MayflowerCLI", "MayflowerCLI\MayflowerCLI.csproj", "{A86336E6-BCFC-4B3D-8F2F-5524533A3C88}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3A3CA428-B7A3-4E50-BB9C-0D2A131951E6}"
-	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
-		Mayflower\Mayflower.nuspec = Mayflower\Mayflower.nuspec
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mayflower", "Mayflower\Mayflower.csproj", "{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A86336E6-BCFC-4B3D-8F2F-5524533A3C88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A86336E6-BCFC-4B3D-8F2F-5524533A3C88}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A86336E6-BCFC-4B3D-8F2F-5524533A3C88}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A86336E6-BCFC-4B3D-8F2F-5524533A3C88}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F8B16D25-FAFF-4605-8F17-3583795AAFBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F8B16D25-FAFF-4605-8F17-3583795AAFBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F8B16D25-FAFF-4605-8F17-3583795AAFBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F8B16D25-FAFF-4605-8F17-3583795AAFBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}.Debug|x64.ActiveCfg = Debug|x64
+		{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}.Debug|x64.Build.0 = Debug|x64
+		{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}.Debug|x86.ActiveCfg = Debug|x86
+		{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}.Debug|x86.Build.0 = Debug|x86
+		{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}.Release|x64.ActiveCfg = Release|x64
+		{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}.Release|x64.Build.0 = Release|x64
+		{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}.Release|x86.ActiveCfg = Release|x86
+		{0D1EBD9B-3B6A-484A-ACB8-C0399B7851FC}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

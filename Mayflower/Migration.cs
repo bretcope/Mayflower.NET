@@ -1,74 +1,112 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Mayflower
 {
-    enum MigrateMode
-    {
-        Skip,
-        Run,
-        Rename,
-        HashMismatch,
-    }
-
     public class Migration
     {
-        static readonly MD5CryptoServiceProvider s_md5Provider = new MD5CryptoServiceProvider();
-        static readonly Regex s_lineEndings = new Regex("\r\n|\n\r|\n|\r", RegexOptions.Compiled);
+        static readonly SHA256 s_sha256 = SHA256.Create();
+        static readonly Regex s_lineEndings = new Regex("\r\n|\n|\r", RegexOptions.Compiled);
+        static readonly Regex s_commandSplitter = new Regex(@"^\s*GO\s*$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
 
-        public List<string> SqlCommands { get; }
+        public string FileName { get; }
+        public string FullFileName { get; }
         public string Hash { get; }
-        public string Filename { get; }
+        public List<string> SqlCommands { get; }
         public bool UseTransaction { get; }
+        public bool AutoRunIfChanged { get; }
 
-        internal Migration(string filePath, Regex commandSplitter)
+        Migration(string fileName, string fillFileName, string hash, List<string> commands, bool useTransaction, bool autoRunIfChanged)
         {
-            var sql = File.ReadAllText(filePath, Encoding.GetEncoding("iso-8859-1"));
-            SqlCommands = commandSplitter.Split(sql).Where(s => s.Trim().Length > 0).ToList();
-            Hash = GetHash(sql);
-            Filename = Path.GetFileName(filePath);
-
-            UseTransaction = !sql.StartsWith("-- no transaction --");
+            FileName = fileName;
+            FullFileName = FullFileName;
+            Hash = hash;
+            SqlCommands = commands;
+            UseTransaction = useTransaction;
+            AutoRunIfChanged = autoRunIfChanged;
         }
 
-        internal MigrateMode GetMigrateMode(AlreadyRan alreadyRan)
+        internal static Migration CreateFromFile(string filePath, string[] autoRunPrefixes, ILogger logger)
         {
-            MigrationRow row;
-            if (alreadyRan.ByFilename.TryGetValue(Filename, out row))
-            {
-                return row.Hash == Hash ? MigrateMode.Skip : MigrateMode.HashMismatch;
-            }
+            var fileName = Path.GetFileName(filePath);
 
-            if (alreadyRan.ByHash.TryGetValue(Hash, out row))
+            using (var fileLogger = logger.CreateNestedLogger(fileName, false, Verbosity.Debug))
             {
-                return MigrateMode.Rename;
-            }
+                fileLogger.Log(Verbosity.Debug, $"Reading file {filePath}");
+                var fileBody = File.ReadAllText(filePath, Encoding.UTF8);
 
-            return MigrateMode.Run;
+                var hash = CalculateHash(fileBody);
+                fileLogger.Log(Verbosity.Detailed, $"Found migration {fileName} ({hash})");
+
+                var commands = new List<string>();
+                foreach (var cmd in s_commandSplitter.Split(fileBody))
+                {
+                    var trimmed = cmd.Trim();
+                    if (trimmed.Length > 0)
+                        commands.Add(trimmed);
+                }
+
+                fileLogger.Log(Verbosity.Debug, $"{commands.Count} commands found");
+
+                var useTransaction = !fileBody.StartsWith("-- no transaction --");
+                if (!useTransaction)
+                    fileLogger.Log(Verbosity.Debug, "Transaction disabled");
+
+                var autoRun = false;
+                foreach (var prefix in autoRunPrefixes)
+                {
+                    if (fileName.StartsWith(prefix))
+                    {
+                        autoRun = true;
+                        break;
+                    }
+                }
+
+                if (autoRun)
+                    fileLogger.Log(Verbosity.Debug, "Autorun if changed enabled");
+
+                return new Migration(fileName, filePath, hash, commands, useTransaction, autoRun);
+            }
         }
 
-        static string GetHash(string str)
+        static string CalculateHash(string body)
         {
-            var normalized = NormalizeLineEndings(str);
+            // normalize line endings
+            var normalized = s_lineEndings.Replace(body, "\n");
             var inputBytes = Encoding.Unicode.GetBytes(normalized);
 
             byte[] hashBytes;
-            lock (s_md5Provider)
+            lock (s_sha256)
             {
-                hashBytes = s_md5Provider.ComputeHash(inputBytes);
+                hashBytes = s_sha256.ComputeHash(inputBytes);
             }
 
-            return new Guid(hashBytes).ToString();
+            return ToHex(hashBytes);
         }
 
-        static string NormalizeLineEndings(string str)
+        static unsafe string ToHex(byte[] bytes)
         {
-            return s_lineEndings.Replace(str, "\n");
+            var len = bytes.Length * 2;
+            var cStr = stackalloc char[len];
+
+            var ptr = cStr;
+            foreach (var b in bytes)
+            {
+                int nibble;
+
+                nibble = b >> 4;
+                *ptr = (char)((nibble < 0xa ? '0' : ('a' - 10)) + nibble);
+                ptr++;
+
+                nibble = b & 0xf;
+                *ptr = (char)((nibble < 0xa ? '0' : ('a' - 10)) + nibble);
+                ptr++;
+            }
+
+            return new string(cStr, 0, len);
         }
     }
 }
