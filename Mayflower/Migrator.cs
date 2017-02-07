@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Mayflower
 {
@@ -43,6 +45,92 @@ namespace Mayflower
             return new Migrator(migrations, logger);
         }
 
+        /// <summary>
+        /// Runs all unrun migrations for each database connection.
+        /// </summary>
+        /// <param name="connections">A list of database connections to run the migrations on.</param>
+        /// <param name="preview">
+        /// If true, all migrations will be run in a global transaction and then rolled back. Any migration marked as "no transaction" will be skipped.
+        /// </param>
+        /// <param name="globalTransaction">
+        /// If true, Mayflower will try to run all migrations in a global transaction. However, this may still be split up if any migrations are marked as "no
+        /// transaction".
+        /// </param>
+        /// <param name="force">If true, any migration which has changed will be re-run.</param>
+        /// <param name="parallel">If true, the migrations will be run in parallel on multiple connections.</param>
+        /// <param name="stopOnFirstFailure">If true, Mayflower will not attempt to migrate any database after one has failed.</param>
+        /// <returns>True if all migrations succeeded, otherwise false.</returns>
+        public bool RunMigrations(
+            IList<ConnectionInfo> connections,
+            bool preview = false,
+            bool globalTransaction = false,
+            bool force = false,
+            bool parallel = true,
+            bool stopOnFirstFailure = true)
+        {
+            if (connections == null)
+                throw new ArgumentNullException(nameof(connections));
+
+            var count = connections.Count;
+            _logger.Log(Verbosity.Normal, $"Migrating {count} database{(count == 1 ? "" : "s")}");
+
+            if (connections.Count == 0)
+                return true;
+
+            var aggregateResult = true;
+
+            if (parallel && connections.Count > 1)
+            {
+                var parallelConns = connections.AsParallel().WithDegreeOfParallelism(Environment.ProcessorCount).WithExecutionMode(ParallelExecutionMode.ForceParallelism);
+
+                parallelConns.ForAll(
+                    conn =>
+                    {
+                        if (!aggregateResult && stopOnFirstFailure)
+                            return;
+
+                        var result = RunMigrationsImpl(conn, preview, globalTransaction, force, true);
+
+                        if (!result)
+                            aggregateResult = false;
+                    });
+            }
+            else
+            {
+                foreach (var conn in connections)
+                {
+                    var result = RunMigrationsImpl(conn, preview, globalTransaction, force, false);
+
+                    if (!result)
+                    {
+                        aggregateResult = false;
+                        if (stopOnFirstFailure)
+                            break;
+                    }
+                }
+            }
+
+            return aggregateResult;
+        }
+
+        /// <summary>
+        /// Runs all unrun migrations for each database connection.
+        /// </summary>
+        /// <param name="connection">The database connection to run the migrations on.</param>
+        /// <param name="preview">
+        /// If true, all migrations will be run in a global transaction and then rolled back. Any migration marked as "no transaction" will be skipped.
+        /// </param>
+        /// <param name="globalTransaction">
+        /// If true, Mayflower will try to run all migrations in a global transaction. However, this may still be split up if any migrations are marked as "no
+        /// transaction".
+        /// </param>
+        /// <param name="force">If true, any migration which has changed will be re-run.</param>
+        /// <returns>True if all migrations succeeded, otherwise false.</returns>
+        public bool RunMigrations(ConnectionInfo connection, bool preview = false, bool globalTransaction = false, bool force = false)
+        {
+            return RunMigrationsImpl(connection, preview, globalTransaction, force, false);
+        }
+
         static Migration[] GetMigrationsFromDirectory(string directory, string autoRunPrefixes, ILogger logger)
         {
             using (var dirLogger = logger.CreateNestedLogger("Reading Migration Files", false, Verbosity.Detailed))
@@ -80,6 +168,14 @@ namespace Mayflower
         static int MigrationSorter(Migration a, Migration b)
         {
             return string.Compare(a.FileName, b.FileName, StringComparison.CurrentCultureIgnoreCase);
+        }
+
+        bool RunMigrationsImpl(ConnectionInfo connection, bool preview, bool globalTransaction, bool force, bool bufferOutput)
+        {
+            using (var logger = _logger.CreateNestedLogger($"Migrating Database {connection.DatabaseName}", bufferOutput, Verbosity.Normal))
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
