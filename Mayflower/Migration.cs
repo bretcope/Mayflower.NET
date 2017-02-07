@@ -40,10 +40,10 @@ namespace Mayflower
         /// </summary>
         public bool AutoRunIfChanged { get; }
 
-        Migration(string fileName, string fillFileName, string hash, List<string> commands, bool useTransaction, bool autoRunIfChanged)
+        Migration(string fileName, string fullFileName, string hash, List<string> commands, bool useTransaction, bool autoRunIfChanged)
         {
             FileName = fileName;
-            FullFileName = FullFileName;
+            FullFileName = fullFileName;
             Hash = hash;
             SqlCommands = commands;
             UseTransaction = useTransaction;
