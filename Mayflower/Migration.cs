@@ -6,17 +6,38 @@ using System.Text.RegularExpressions;
 
 namespace Mayflower
 {
+    /// <summary>
+    /// Represents a migration file.
+    /// </summary>
     public class Migration
     {
         static readonly SHA256 s_sha256 = SHA256.Create();
         static readonly Regex s_lineEndings = new Regex("\r\n|\n|\r", RegexOptions.Compiled);
         static readonly Regex s_commandSplitter = new Regex(@"^\s*GO\s*$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
 
+        /// <summary>
+        /// The name of the migration file.
+        /// </summary>
         public string FileName { get; }
+        /// <summary>
+        /// The full name of the migration file, which may include its path.
+        /// </summary>
         public string FullFileName { get; }
+        /// <summary>
+        /// A hex representation of the file's SHA256 Hash.
+        /// </summary>
         public string Hash { get; }
+        /// <summary>
+        /// An array of the SQL commands which were present in the file.
+        /// </summary>
         public List<string> SqlCommands { get; }
+        /// <summary>
+        /// If true, the migration's commands will be run inside a migration.
+        /// </summary>
         public bool UseTransaction { get; }
+        /// <summary>
+        /// If true, the migration will be re-run anytime the file is changed.
+        /// </summary>
         public bool AutoRunIfChanged { get; }
 
         Migration(string fileName, string fillFileName, string hash, List<string> commands, bool useTransaction, bool autoRunIfChanged)
