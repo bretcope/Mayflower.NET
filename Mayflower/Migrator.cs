@@ -49,9 +49,16 @@ namespace Mayflower
 
             _db = new ConnectionContext(options);
 
+            Log("    Database:         " + _db.Database);
+
             Migrations = GetAllMigrations(dir, _db.CommandSplitter).ToList();
 
-            Log("    Database:         " + _db.Database);
+            if (!Migrations.Any())
+            {
+                Log("No migrations found.");
+                return;
+            }
+
             _db.Open();
             
             Log("    Transaction Mode: " + (_useGlobalTransaction ? "Global" : "Individual"));
@@ -122,7 +129,7 @@ namespace Mayflower
 
         MigrationResult RunOutstandingMigrations()
         {
-            Log("Running migrations" + (_isPreview ? " (preview mode)" : ""));
+            if (Migrations.Any()) Log("Running migrations" + (_isPreview ? " (preview mode)" : ""));
             Log();
 
             var result = new MigrationResult();
