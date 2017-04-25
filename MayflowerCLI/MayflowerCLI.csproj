@@ -51,7 +51,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -74,5 +76,6 @@
   <Target Name="AfterBuild">
     <!-- Make a copy of the exe without the CLI part -->
     <Copy SourceFiles="bin\$(Configuration)\MayflowerCLI.exe" DestinationFiles="bin\$(Configuration)\mayflower.exe" />
+    <Copy SourceFiles="bin\$(Configuration)\MayflowerCLI.exe.config" DestinationFiles="bin\$(Configuration)\mayflower.exe.config" />
   </Target>
 </Project>

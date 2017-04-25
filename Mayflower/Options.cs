@@ -1,12 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Configuration;
 
 namespace Mayflower
 {
     public class Options
     {
         public string ConnectionString { get; set; }
+        public string ConnectionStringName { get; set; }
         public string Database { get; set; }
         public string Server { get; set; }
         public int CommandTimeout { get; set; } = 30;
@@ -20,9 +22,20 @@ namespace Mayflower
 
         public void AssertValid()
         {
-            if (string.IsNullOrEmpty(ConnectionString) == string.IsNullOrEmpty(Database))
+            if (string.IsNullOrWhiteSpace(ConnectionString) && string.IsNullOrWhiteSpace(Database) && string.IsNullOrWhiteSpace(ConnectionStringName))
             {
-                throw new Exception("Either a connection string or a database must be specified.");
+                var count = ConfigurationManager.ConnectionStrings.Count;
+                if (count == 0 ||
+                    (count > 0 && string.IsNullOrWhiteSpace(ConfigurationManager.ConnectionStrings[0].ConnectionString)))
+                {
+                    throw new Exception(
+                        "There is no connection string in the config file. Either a connection string or a database must be specified.");
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(ConnectionStringName) && string.IsNullOrWhiteSpace(ConfigurationManager.ConnectionStrings[ConnectionStringName]?.ConnectionString))
+            {
+                throw new Exception("When a connection string name is specified, it must exist in the .config file.");
             }
 
             if (!string.IsNullOrEmpty(MigrationsTable))
@@ -40,8 +53,21 @@ namespace Mayflower
             if (!string.IsNullOrEmpty(ConnectionString))
                 return ConnectionString;
 
-            var server = string.IsNullOrEmpty(Server) ? "localhost" : Server;
-            return $"Persist Security Info=False;Integrated Security=true;Initial Catalog={Database};server={server}";
+            if (!string.IsNullOrEmpty(ConnectionStringName))
+                return ConfigurationManager.ConnectionStrings[ConnectionStringName]?.ConnectionString;
+
+            if (!string.IsNullOrEmpty(Database))
+            {
+                var server = string.IsNullOrEmpty(Server) ? "localhost" : Server;
+                return $"Persist Security Info=False;Integrated Security=true;Initial Catalog={Database};server={server}";
+            }
+
+            if (ConfigurationManager.ConnectionStrings.Count > 0 && !string.IsNullOrWhiteSpace(ConfigurationManager.ConnectionStrings[0].ConnectionString))
+            {
+                return ConfigurationManager.ConnectionStrings[0].ConnectionString;
+            }
+
+            throw new Exception("There is no connection string in the config file. Either a connection string or a database must be specified.");
         }
 
         internal string GetMigrationsTable()

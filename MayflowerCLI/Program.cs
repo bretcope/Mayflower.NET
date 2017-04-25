@@ -39,6 +39,9 @@ namespace MayflowerCLI
                     Console.WriteLine(count + " outstanding migrations");
                     Console.WriteLine();
                     break;
+                case Command.None:
+                    Environment.Exit(1);
+                    break;
             }
 
             Environment.Exit(0);
@@ -55,6 +58,7 @@ namespace MayflowerCLI
             {
                 { "h|help", "Shows this help message.", v => showHelp= v != null },
                 {"c|connection=", "A SQL Server connection string. For integrated auth, you can use --database and --server instead.", v => optionsTmp.ConnectionString = v },
+                {"n|name=", "A conections string from the config file.", v => optionsTmp.ConnectionStringName = v },
                 {"d|database=", "Generates an integrated auth connection string for the specified database.", v => optionsTmp.Database = v },
                 {"s|server=", "Generates an integrated auth connection string with the specified server (default: localhost).", v=> optionsTmp.Server = v },
                 {"f|folder=", "The folder containing your .sql migration files (defaults to current working directory).", v => optionsTmp.MigrationsFolder = v },
@@ -102,10 +106,15 @@ namespace MayflowerCLI
         {
             Console.WriteLine("Usage: mayflower [OPTIONS]+");
             Console.WriteLine("  Runs all *.sql files in the directory --dir=<directory>.");
-            Console.WriteLine("  The databse connection can be specified using a full connection string with --connection,");
+            Console.WriteLine("  The database connection can be specified using a full connection string with --connection,");
+            Console.WriteLine("  a connection string name from the config file can be specified with --name,");
             Console.WriteLine("  or Mayflower can generate an integrated auth connection string using the --database and");
             Console.WriteLine("  optional --server arguments.");
             Console.WriteLine();
+            Console.WriteLine("  If no connection was specified, but there is a connection string in the config file, it will");
+            Console.WriteLine("  be used as default. If there is more then one connection string, the first one will be used.");
+            Console.WriteLine();
+
             optionSet.WriteOptionDescriptions(Console.Out);
         }
 
