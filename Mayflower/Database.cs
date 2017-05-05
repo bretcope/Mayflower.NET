@@ -6,8 +6,10 @@ namespace Mayflower
     /// <summary>
     /// Describes the information necessary for establishing a connection with a SQL Server database.
     /// </summary>
-    public class ConnectionInfo
+    public class Database
     {
+        const string MIGRATIONS_DEFAULT = "Migrations";
+
         /// <summary>
         /// The connection string which can be used for establishing the connection.
         /// </summary>
@@ -20,18 +22,23 @@ namespace Mayflower
         /// Hostname (or IP address) of the SQL Server machine.
         /// </summary>
         public string ServerName { get; }
+        /// <summary>
+        /// The name of the Migrations table which will be used to track which migrations have already been applied to the database.
+        /// </summary>
+        public string MigrationsTableName { get; }
 
-        ConnectionInfo(string connection, string db, string server)
+        Database(string connection, string db, string server, string migrationsTableName)
         {
             ConnectionString = connection;
             DatabaseName = db;
             ServerName = server;
+            MigrationsTableName = migrationsTableName;
         }
 
         /// <summary>
         /// Creates an integrated auth connection string.
         /// </summary>
-        public static ConnectionInfo BuildIntegratedAuth(string databaseName, string serverName = "localhost")
+        public static Database FromIntegratedAuth(string databaseName, string serverName = "localhost", string migrationsTableName = MIGRATIONS_DEFAULT)
         {
             if (string.IsNullOrWhiteSpace(databaseName))
                 throw new Exception("Database name cannot be null or empty.");
@@ -41,13 +48,13 @@ namespace Mayflower
 
             var conn = $"Persist Security Info=False;Integrated Security=true;Initial Catalog={databaseName};server={serverName}";
 
-            return new ConnectionInfo(conn, databaseName, serverName);
+            return new Database(conn, databaseName, serverName, migrationsTableName);
         }
 
         /// <summary>
-        /// Creates a ConnectionInfo instance from a raw connection string.
+        /// Creates a <see cref="Database"/> instance from a raw connection string.
         /// </summary>
-        public static ConnectionInfo FromConnectionString(string connectionString)
+        public static Database FromConnectionString(string connectionString, string migrationsTableName = MIGRATIONS_DEFAULT)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new Exception("Connection string cannot be null or empty.");
@@ -60,7 +67,7 @@ namespace Mayflower
             if (string.IsNullOrWhiteSpace(builder.DataSource))
                 throw new Exception("Connection string must provide a data source (server).");
 
-            return new ConnectionInfo(connectionString, builder.InitialCatalog, builder.DataSource);
+            return new Database(connectionString, builder.InitialCatalog, builder.DataSource, migrationsTableName);
         }
     }
 }

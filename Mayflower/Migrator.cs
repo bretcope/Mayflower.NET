@@ -46,9 +46,9 @@ namespace Mayflower
         }
 
         /// <summary>
-        /// Runs all unrun migrations for each database connection.
+        /// Runs all unrun migrations for each database database.
         /// </summary>
-        /// <param name="connections">A list of database connections to run the migrations on.</param>
+        /// <param name="databases">A list of databases to run the migrations on.</param>
         /// <param name="preview">
         /// If true, all migrations will be run in a global transaction and then rolled back. Any migration marked as "no transaction" will be skipped.
         /// </param>
@@ -57,31 +57,34 @@ namespace Mayflower
         /// transaction".
         /// </param>
         /// <param name="force">If true, any migration which has changed will be re-run.</param>
-        /// <param name="parallel">If true, the migrations will be run in parallel on multiple connections.</param>
+        /// <param name="parallel">If true, the migrations will be run in parallel on multiple databases.</param>
         /// <param name="stopOnFirstFailure">If true, Mayflower will not attempt to migrate any database after one has failed.</param>
         /// <returns>True if all migrations succeeded, otherwise false.</returns>
         public bool RunMigrations(
-            IList<ConnectionInfo> connections,
+            IList<Database> databases,
             bool preview = false,
             bool globalTransaction = false,
             bool force = false,
             bool parallel = true,
             bool stopOnFirstFailure = true)
         {
-            if (connections == null)
-                throw new ArgumentNullException(nameof(connections));
+            if (databases == null)
+                throw new ArgumentNullException(nameof(databases));
 
-            var count = connections.Count;
+            var count = databases.Count;
             _logger.Log(Verbosity.Normal, $"Migrating {count} database{(count == 1 ? "" : "s")}");
 
-            if (connections.Count == 0)
+            if (preview)
+                _logger.Log(Verbosity.Normal, "Preview mode (all transactions will be rolled back)");
+
+            if (databases.Count == 0)
                 return true;
 
             var aggregateResult = true;
 
-            if (parallel && connections.Count > 1)
+            if (parallel && databases.Count > 1)
             {
-                var parallelConns = connections.AsParallel().WithDegreeOfParallelism(Environment.ProcessorCount).WithExecutionMode(ParallelExecutionMode.ForceParallelism);
+                var parallelConns = databases.AsParallel().WithDegreeOfParallelism(Environment.ProcessorCount).WithExecutionMode(ParallelExecutionMode.ForceParallelism);
 
                 parallelConns.ForAll(
                     conn =>
@@ -97,7 +100,7 @@ namespace Mayflower
             }
             else
             {
-                foreach (var conn in connections)
+                foreach (var conn in databases)
                 {
                     var result = RunMigrationsImpl(conn, preview, globalTransaction, force, false);
 
@@ -114,9 +117,9 @@ namespace Mayflower
         }
 
         /// <summary>
-        /// Runs all unrun migrations for each database connection.
+        /// Runs all unrun migrations for each database.
         /// </summary>
-        /// <param name="connection">The database connection to run the migrations on.</param>
+        /// <param name="database">The database to run the migrations on.</param>
         /// <param name="preview">
         /// If true, all migrations will be run in a global transaction and then rolled back. Any migration marked as "no transaction" will be skipped.
         /// </param>
@@ -126,9 +129,12 @@ namespace Mayflower
         /// </param>
         /// <param name="force">If true, any migration which has changed will be re-run.</param>
         /// <returns>True if all migrations succeeded, otherwise false.</returns>
-        public bool RunMigrations(ConnectionInfo connection, bool preview = false, bool globalTransaction = false, bool force = false)
+        public bool RunMigrations(Database database, bool preview = false, bool globalTransaction = false, bool force = false)
         {
-            return RunMigrationsImpl(connection, preview, globalTransaction, force, false);
+            if (preview)
+                _logger.Log(Verbosity.Normal, "Preview mode (all transactions will be rolled back)");
+
+            return RunMigrationsImpl(database, preview, globalTransaction, force, false);
         }
 
         static Migration[] GetMigrationsFromDirectory(string directory, string autoRunPrefixes, ILogger logger)
@@ -167,15 +173,46 @@ namespace Mayflower
 
         static int MigrationSorter(Migration a, Migration b)
         {
-            return string.Compare(a.FileName, b.FileName, StringComparison.CurrentCultureIgnoreCase);
+            return string.Compare(a.Filename, b.Filename, StringComparison.CurrentCultureIgnoreCase);
         }
 
-        bool RunMigrationsImpl(ConnectionInfo connection, bool preview, bool globalTransaction, bool force, bool bufferOutput)
+        bool RunMigrationsImpl(Database db, bool preview, bool globalTransaction, bool force, bool bufferOutput)
         {
-            using (var logger = _logger.CreateNestedLogger($"Migrating Database {connection.DatabaseName}", bufferOutput, Verbosity.Normal))
+            using (var logger = _logger.CreateNestedLogger($"Migrating Database {db.DatabaseName}", bufferOutput, Verbosity.Normal))
             {
-                throw new NotImplementedException();
+                try
+                {
+                    using (var context = ConnectionContext.TryOpen(db, logger))
+                    {
+                        if (context == null)
+                            return false;
+
+                        if (preview)
+                        {
+                            logger.Log(Verbosity.Debug, "Creating global transaction for preview mode");
+                            context.BeginTransaction(logger);
+                        }
+
+                        context.EnsureMigrationsTableExists(logger);
+                        context.LoadMigrationRecords(logger);
+
+                        //
+
+                        // loop through Migrations and execute as necessary
+
+                        return true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
             }
+        }
+
+        void ExecuteMigration(Migration migration, bool global)
+        {
+            //
         }
     }
 }

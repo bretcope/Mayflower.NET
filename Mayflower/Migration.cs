@@ -18,11 +18,11 @@ namespace Mayflower
         /// <summary>
         /// The name of the migration file.
         /// </summary>
-        public string FileName { get; }
+        public string Filename { get; }
         /// <summary>
         /// The full name of the migration file, which may include its path.
         /// </summary>
-        public string FullFileName { get; }
+        public string FullFilename { get; }
         /// <summary>
         /// A hex representation of the file's SHA256 Hash.
         /// </summary>
@@ -40,10 +40,10 @@ namespace Mayflower
         /// </summary>
         public bool AutoRunIfChanged { get; }
 
-        Migration(string fileName, string fullFileName, string hash, List<string> commands, bool useTransaction, bool autoRunIfChanged)
+        Migration(string filename, string fullFilename, string hash, List<string> commands, bool useTransaction, bool autoRunIfChanged)
         {
-            FileName = fileName;
-            FullFileName = fullFileName;
+            Filename = filename;
+            FullFilename = fullFilename;
             Hash = hash;
             SqlCommands = commands;
             UseTransaction = useTransaction;
@@ -52,15 +52,15 @@ namespace Mayflower
 
         internal static Migration CreateFromFile(string filePath, string[] autoRunPrefixes, ILogger logger)
         {
-            var fileName = Path.GetFileName(filePath);
+            var filename = Path.GetFileName(filePath);
 
-            using (var fileLogger = logger.CreateNestedLogger(fileName, false, Verbosity.Debug))
+            using (var fileLogger = logger.CreateNestedLogger(filename, false, Verbosity.Debug))
             {
                 fileLogger.Log(Verbosity.Debug, $"Reading file {filePath}");
                 var fileBody = File.ReadAllText(filePath, Encoding.UTF8);
 
                 var hash = CalculateHash(fileBody);
-                fileLogger.Log(Verbosity.Detailed, $"Found migration {fileName} ({hash})");
+                fileLogger.Log(Verbosity.Detailed, $"Found migration {filename} ({hash})");
 
                 var commands = new List<string>();
                 foreach (var cmd in s_commandSplitter.Split(fileBody))
@@ -79,7 +79,7 @@ namespace Mayflower
                 var autoRun = false;
                 foreach (var prefix in autoRunPrefixes)
                 {
-                    if (fileName.StartsWith(prefix))
+                    if (filename.StartsWith(prefix))
                     {
                         autoRun = true;
                         break;
@@ -89,7 +89,7 @@ namespace Mayflower
                 if (autoRun)
                     fileLogger.Log(Verbosity.Debug, "Autorun if changed enabled");
 
-                return new Migration(fileName, filePath, hash, commands, useTransaction, autoRun);
+                return new Migration(filename, filePath, hash, commands, useTransaction, autoRun);
             }
         }
 

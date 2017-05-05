@@ -6,7 +6,11 @@
     public enum Verbosity
     {
         /// <summary>
-        /// Only high-level actions are printed.
+        /// Only errors are printed.
+        /// </summary>
+        Error = 0,
+        /// <summary>
+        /// Only high-level actions and errors are printed.
         /// </summary>
         Minimal = 5,
         /// <summary>
