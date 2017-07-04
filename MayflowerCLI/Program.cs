@@ -50,12 +50,12 @@ namespace MayflowerCLI
             var showVersion = false;
             var getCount = false;
             var optionsTmp = options = new Options();
-
             var optionSet = new OptionSet()
             {
                 { "h|help", "Shows this help message.", v => showHelp= v != null },
                 {"c|connection=", "A SQL Server connection string. For integrated auth, you can use --database and --server instead.", v => optionsTmp.ConnectionString = v },
                 {"d|database=", "Generates an integrated auth connection string for the specified database.", v => optionsTmp.Database = v },
+                {"p|provider=", "The database provider.", v => optionsTmp.Provider = (DatabaseProvider) Enum.Parse(typeof(DatabaseProvider), v) },
                 {"s|server=", "Generates an integrated auth connection string with the specified server (default: localhost).", v=> optionsTmp.Server = v },
                 {"f|folder=", "The folder containing your .sql migration files (defaults to current working directory).", v => optionsTmp.MigrationsFolder = v },
                 {"timeout=", "Command timeout duration in seconds (default: 30)", v => optionsTmp.CommandTimeout = int.Parse(v) },
