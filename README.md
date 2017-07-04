@@ -1,12 +1,15 @@
 # Mayflower.NET
 
-Mayflower is a simple, forward-only, database migrator for SQL Server based on the migrator which Stack Overflow uses.
+Mayflower is a simple, forward-only, database migrator for SQL Server and MySql based on the migrator which Stack Overflow uses.
 
 ## Usage
 
 ### Creating Migrations
 
-A migration is just plain T-SQL saved in a .sql file. Individual commands are separated with the `GO` keyword, just like when using [SSMS](https://msdn.microsoft.com/en-us/library/mt238290.aspx). For example:
+A migration is just plain T-SQL saved in a .sql file. 
+
+#### SQL
+Individual commands are separated with the `GO` keyword, just like when using [SSMS](https://msdn.microsoft.com/en-us/library/mt238290.aspx). For example:
 
 ```sql
 CREATE TABLE One
@@ -20,6 +23,21 @@ GO
 
 INSERT INTO One (Name) VALUES ('Wystan')
 GO
+```
+
+#### Mysql
+Individual commands are separated with the `;`. For example:
+
+```sql
+CREATE TABLE One
+(
+  Id int not null AUTO_INCREMENT,
+  Name nvarchar(50) not null,
+  
+  constraint PK_One primary key clustered (Id)
+);
+
+INSERT INTO One (Name) VALUES ('Wystan');
 ```
 
 > Migrations are run in a transaction by default, which allows them to be rolled back if any command fails. You can disable this transaction for a specific migration by beginning the file with `-- no transaction --`.
@@ -67,6 +85,8 @@ Usage: mayflower [OPTIONS]+
                                instead.
   -d, --database=VALUE       Generates an integrated auth connection string
                                for the specified database.
+  -p, --provider=VALUE       The database provider you want to use.  Options are
+	                           SQL and MySql.
   -s, --server=VALUE         Generates an integrated auth connection string
                                with the specified server (default: localhost).
   -f, --folder=VALUE         The folder containing your .sql migration files

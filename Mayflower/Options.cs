@@ -16,7 +16,7 @@ namespace Mayflower
         public string MigrationsTable { get; set; }
         public TextWriter Output { get; set; }
         public bool Force { get; set; }
-        public DatabaseProvider Provider { get; set; } // there's no command line param for this yet because there's only one provider
+        public DatabaseProvider Provider { get; set; }
 
         public void AssertValid()
         {
@@ -34,19 +34,28 @@ namespace Mayflower
 
         internal string GetConnectionString(DatabaseProvider provider)
         {
-            if (provider != DatabaseProvider.SqlServer)
-                throw new Exception($"Unsupported DatabaseProvider " + provider);
-
             if (!string.IsNullOrEmpty(ConnectionString))
                 return ConnectionString;
 
+            // TODO Create connection based on type
             var server = string.IsNullOrEmpty(Server) ? "localhost" : Server;
-            return $"Persist Security Info=False;Integrated Security=true;Initial Catalog={Database};server={server}";
+
+            if (provider == DatabaseProvider.SqlServer)
+                return $"Persist Security Info=False;Integrated Security=true;Initial Catalog={Database};server={server}";
+            else if (provider == DatabaseProvider.MySql)
+                return $"Database={Database};server={server}";
+            else
+                throw new Exception("Database provider is not supported.");
         }
 
-        internal string GetMigrationsTable()
+        internal string GetMigrationsTable(DatabaseProvider provider)
         {
-            return string.IsNullOrEmpty(MigrationsTable) ? "Migrations" : MigrationsTable;
+            if (provider == DatabaseProvider.SqlServer)
+                return string.IsNullOrEmpty(MigrationsTable) ? "Migrations" : MigrationsTable;
+            else if (provider == DatabaseProvider.MySql)
+                return string.IsNullOrEmpty(MigrationsTable) ? "migrations" : MigrationsTable;
+            else
+                throw new Exception("Database provider is not supported.");
         }
 
         internal string GetFolder()

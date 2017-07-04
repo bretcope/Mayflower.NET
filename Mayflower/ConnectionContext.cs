@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -9,6 +10,7 @@ namespace Mayflower
     public enum DatabaseProvider
     {
         SqlServer = 0,
+        MySql = 1
     }
 
     class ConnectionContext : IDisposable
@@ -37,9 +39,14 @@ namespace Mayflower
             switch (Provider)
             {
                 case DatabaseProvider.SqlServer:
-                    _sql = new SqlServerStatements(options.GetMigrationsTable());
+                    _sql = new SqlServerStatements(options.GetMigrationsTable(DatabaseProvider.SqlServer));
                     _connection = new SqlConnection(connStr);
                     Database = new SqlConnectionStringBuilder(connStr).InitialCatalog;
+                    break;
+                case DatabaseProvider.MySql:
+                    _sql = new MySqlStatements(options.GetMigrationsTable(DatabaseProvider.MySql));
+                    _connection = new MySqlConnection(connStr);
+                    Database = new MySqlConnectionStringBuilder(connStr).Database;
                     break;
                 default:
                     throw new Exception("Unsupported DatabaseProvider " + options.Provider);
@@ -85,7 +92,11 @@ namespace Mayflower
         internal bool MigrationTableExists()
         {
             var cmd = _connection.NewCommand(_sql.DoesMigrationsTableExist);
-            return (int)cmd.ExecuteScalar() == 1;
+
+            if (Provider == DatabaseProvider.MySql)
+                return (long)cmd.ExecuteScalar() == 1;
+            else
+                return (int)cmd.ExecuteScalar() == 1;
         }
 
         internal void CreateMigrationsTable()
