@@ -37,7 +37,6 @@ namespace Mayflower
             if (!string.IsNullOrEmpty(ConnectionString))
                 return ConnectionString;
 
-            // TODO Create connection based on type
             var server = string.IsNullOrEmpty(Server) ? "localhost" : Server;
 
             if (provider == DatabaseProvider.SqlServer)

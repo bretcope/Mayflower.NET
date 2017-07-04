@@ -25,7 +25,7 @@ INSERT INTO One (Name) VALUES ('Wystan')
 GO
 ```
 
-#### Mysql
+#### MySql
 Individual commands are separated with the `;`. For example:
 
 ```sql

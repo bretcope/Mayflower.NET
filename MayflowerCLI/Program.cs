@@ -41,7 +41,6 @@ namespace MayflowerCLI
                     break;
             }
 
-            Console.Read();
             Environment.Exit(0);
         }
 
@@ -51,7 +50,6 @@ namespace MayflowerCLI
             var showVersion = false;
             var getCount = false;
             var optionsTmp = options = new Options();
-            
             var optionSet = new OptionSet()
             {
                 { "h|help", "Shows this help message.", v => showHelp= v != null },
